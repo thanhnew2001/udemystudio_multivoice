@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng dụng Thu Âm Giọng Đọc</title>
+    <style>
+        /* Basic styles */
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; cursor: pointer; }
+        .sentence { font-size: 20px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Ứng Dụng Thu Âm Giọng Đọc</h1>
+
+    <!-- User ID Section -->
+    <div id="user-id-section">
+        <label for="user-id">Nhập ID của bạn: </label>
+        <input type="text" id="user-id" placeholder="VD: user123">
+        <button id="start-session-btn" onclick="startSession()">Bắt đầu phiên thu âm</button>
+    </div>
+
+    <div id="recording-section" style="display:none;">
+        <div id="sentence-container" class="sentence">
+            <p id="sentence-text">Loading...</p>
+        </div>
+
+        <button id="next-sentence-btn" onclick="nextSentence()">Câu tiếp theo</button>
+
+        <br><br>
+
+        <h2>Thu Âm Giọng</h2>
+        <button id="start-recording-btn" onclick="startRecording()" disabled>Bắt đầu thu âm</button>
+        <button id="stop-recording-btn" onclick="stopRecording()" disabled>Dừng thu âm</button>
+
+        <audio id="audio-player" controls></audio>
+
+        <h2>Chức Năng</h2>
+        <button id="download-zip-btn" onclick="downloadZip()">Tải toàn bộ</button>
+
+        <button id="reset-all-btn" onclick="resetAll()">Xoá hết và thu lại từ đầu</button>
+    </div>
+
+</div>
+
+<script>
+    let currentSentenceIndex = 0;
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob;
+    let audioUrl;
+    let userId = '';
+    
+    // Bắt đầu phiên thu âm khi nhập ID
+    function startSession() {
+        userId = document.getElementById('user-id').value.trim();
+        if (!userId) {
+            alert('Vui lòng nhập ID của bạn!');
+            return;
+        }
+
+        document.getElementById('user-id-section').style.display = 'none';
+        document.getElementById('recording-section').style.display = 'block';
+        
+        // Fetch the first sentence for this user
+        fetchNextSentence();
+        
+        document.getElementById('start-recording-btn').disabled = false;
+    }
+
+    // Tải câu tiếp theo
+    function nextSentence() {
+           // Upload audio
+        let formData = new FormData();
+        formData.append('audio', audioBlob, 'audio.wav');
+        formData.append('sentence_index', currentSentenceIndex - 1);
+        formData.append('user_id', userId);
+
+        fetch('/upload-audio', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                console.log(data.message);
+            }
+        });
+        fetchNextSentence();
+    }
+
+    // Fetch the next sentence for the user from the server
+    function fetchNextSentence() {
+        fetch(`/get-next-sentence/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.sentence) {
+                    document.getElementById('sentence-text').innerText = data.sentence;
+                    currentSentenceIndex = data.index;
+                } else {
+                    alert('Tất cả các câu đã hoàn thành!');
+                }
+            });
+    }
+
+    // Bắt đầu thu âm
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioUrl = URL.createObjectURL(audioBlob);
+                    document.getElementById('audio-player').src = audioUrl;
+                    audioChunks = [];
+                };
+                mediaRecorder.start();
+                document.getElementById('stop-recording-btn').disabled = false;
+                document.getElementById('start-recording-btn').disabled = true;
+            });
+    }
+
+    // Dừng thu âm
+    function stopRecording() {
+        mediaRecorder.stop();
+        document.getElementById('stop-recording-btn').disabled = true;
+        document.getElementById('start-recording-btn').disabled = false;
+        
+     
+    }
+
+    // Tải toàn bộ file ZIP
+    function downloadZip() {
+        window.location.href = `/download-zip/${userId}`;
+    }
+
+   
+     // Xóa tất cả các file và bắt đầu lại từ đầu
+     function resetAll() {
+        userId = document.getElementById('user-id').value; // Get the user ID from input field
+        if (!userId) {
+            alert("Vui lòng nhập ID người dùng!");
+            return;
+        }
+
+        if (confirm("Bạn chắc chắn muốn xóa tất cả và thu lại từ đầu?")) {
+            fetch(`/reset-all/${userId}`, { // Send user ID to backend
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById('sentence-text').innerText = 'Loading...';
+                currentSentenceIndex = 0;
+                document.getElementById('audio-player').src = '';
+                audioChunks = [];
+                audioBlob = null;
+                audioUrl = null;
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra: ' + error);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
