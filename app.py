@@ -15,72 +15,28 @@ AUDIO_FOLDER = 'static/audio/'
 if not os.path.exists(AUDIO_FOLDER):
     os.makedirs(AUDIO_FOLDER)
 
-# Danh sách các câu ngắn (tối đa 15 từ mỗi câu)
-sentences = [
-    "Hằng năm cứ vào cuối thu, lá ngoài đường rụng nhiều.",
-    "Trên không có những đám mây bàng bạc, lòng tôi lại nao nức.",
-    "Những kỷ niệm hoang mang của buổi tựu trường lại ùa về.",
-    "Tôi không thể nào quên được những cảm giác trong sáng ấy.",
-    "Chúng nảy nở trong lòng tôi như mấy cành hoa tươi.",
-    "Như mỉm cười giữa bầu trời quang đãng, trong sáng và tươi đẹp.",
-    "Những ý tưởng ấy tôi chưa lần nào ghi lên giấy.",
-    "Vì hồi ấy tôi không biết ghi và ngày nay tôi không nhớ hết.",
-    "Nhưng mỗi lần thấy mấy em nhỏ rụt rè núp dưới nón mẹ.",
-    "Lần đầu tiên đến trường, lòng tôi lại tưng bừng rộn rã.",
-    "Buổi sáng mai hôm ấy, một buổi mai đầy sương thu và gió lạnh.",
-    "Mẹ tôi âu yếm nắm tay tôi dẫn đi trên con đường làng dài.",
-    "Con đường này tôi đã quen đi lại lắm lần, nhưng lần này tôi thấy lạ.",
-    "Cảnh vật chung quanh tôi đều thay đổi, vì chính lòng tôi đang thay đổi.",
-    "Hôm nay tôi đi học, cảm giác mới lạ và hồi hộp.",
-    "Tôi không lội qua sông thả diều như thằng Quí nữa.",
-    "Không ra đồng nô hò như thằng Sơn nữa.",
-    "Trong chiếc áo vải dù đen dài tôi cảm thấy mình trang trọng và đứng đắn.",
-    "Dọc đường tôi thấy mấy cậu nhỏ trạc bằng tôi, áo quần tươm tất.",
-    "Nhí nhảnh gọi tên nhau hay trao sách vở cho nhau xem mà tôi thèm.",
-    "Hai quyển vở mới đang ở trên tay tôi đã bắt đầu thấy nặng.",
-    "Tôi bặm tay ghì thật chặt, nhưng một quyển vở cũng chìa ra.",
-    "Quyển vở chênh đầu chúi xuống đất, tôi xóc lên và nắm lại cẩn thận.",
-    "Mấy cậu đi trước có sách vở thiệt nhiều lại kèm cả bút thước.",
-    "Nhưng mấy cậu không để lộ vẻ khó khăn gì hết."
-]
+# File chứa dữ liệu các câu cần đọc
+SENTENCE_FILE = 'static/vi_VN/0000000001_0300000050_General.txt'
 
-# Danh sách các câu ngắn (tối đa 15 từ mỗi câu) từ đoạn văn mới
-sentences += [
-    "Tôi muốn thử sức mình nên nhìn mẹ tôi.",
-    "Mẹ đưa bút thước cho con cầm.",
-    "Mẹ tôi cúi đầu nhìn tôi với cặp mắt thật âu yếm.",
-    "Thôi để mẹ nắm cũng được.",
-    "Tôi có ngay cái ý kiến vừa non nớt vừa ngây thơ này.",
-    "Chắc chỉ người thạo mới cầm nổi bút thước.",
-    "Ý nghĩ thoáng qua trong trí tôi nhẹ nhàng như một làn mây.",
-    "Lướt ngang trên ngọn núi, ý nghĩ nhẹ nhàng và bay bổng.",
-    "Trước sân trường làng Mỹ Lý đầy đặc cả người.",
-    "Người nào áo quần cũng sạch sẽ, gương mặt cũng vui tươi và sáng sủa.",
-    "Trước đó mấy hôm, lúc đi ngang làng Hòa An bẫy chim quyên với thằng Minh.",
-    "Tôi có ghé trường một lần.",
-    "Lần ấy trường đối với tôi là một nơi xa lạ.",
-    "Tôi đi chung quanh các lớp để nhìn qua cửa kính mấy bản đồ.",
-    "Tôi không có cảm tưởng gì khác là nhà trường cao ráo sạch sẽ hơn các nhà trong làng.",
-    "Nhưng lần này lại khác.",
-    "Trước mặt tôi, trường Mỹ Lý vừa xinh xắn vừa oai nghiêm như cái đình Hòa Ấp.",
-    "Sân nó rộng, mình nó cao hơn những buổi trưa hè đầy vắng lặng.",
-    "Lòng tôi đâm ra lo sợ vẩn vơ.",
-    "Cũng như tôi, mấy cậu học trò mới bỡ ngỡ đứng nép bên người thân.",
-    "Chỉ dám nhìn một nửa hay dám đi từng bước nhẹ.",
-    "Họ như con chim con đứng trên bờ tổ.",
-    "Họ nhìn quãng trời rộng muốn bay, nhưng còn ngập ngừng e sợ.",
-    "Họ thèm vụng và ước ao thầm được như những học trò cũ.",
-    "Biết lớp, biết thầy để khỏi phải rụt rè trong cảnh lạ.",
-    "Sau một hồi trống thúc vang dội cả lòng tôi, mấy người học trò cũ đến sắp hàng.",
-    "Rồi đi vào lớp.",
-    "Chung quanh những cậu bé vụng về lúng túng như tôi cả.",
-    "Các cậu không đi.",
-    "Các cậu chỉ theo sức mạnh kéo dìu các cậu tới trước.",
-    "Nói các cậu không đứng lại càng đúng hơn nữa.",
-    "Vì hai chân các cậu cứ dềnh dàng mãi.",
-    "Hết co lên một chân, các cậu lại duỗi mạnh như đá một quả banh tưởng tượng.",
-    "Chính lúc này toàn thân các cậu cũng đang run run theo nhịp bước rộn ràng trong các lớp."
-]
+# Danh sách các câu ngắn
+sentences = []
+
+def load_sentences():
+    """Load sentences from the text file."""
+    global sentences
+    if os.path.exists(SENTENCE_FILE):
+        with open(SENTENCE_FILE, mode='r', encoding='utf-8') as file:
+            lines = file.readlines()
+            for line in lines:
+                # Split each line into sentence id and sentence content
+                parts = line.strip().split("\t")
+                if len(parts) == 2:
+                    sentences.append(parts[1])  # Add only the sentence content
+    else:
+        print(f"File {SENTENCE_FILE} does not exist.")
+
+# Load sentences when the application starts
+load_sentences()
 
 # Dictionary to store the current sentence index for each user
 user_progress = {}
